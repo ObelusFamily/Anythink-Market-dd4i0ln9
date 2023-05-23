@@ -24,6 +24,7 @@ from app.models.schemas.items import (
 from app.resources import strings
 from app.services.items import check_item_exists, get_slug_for_item
 from app.services.event import send_event
+from app.api.routes.items.openai import generate_image
 
 router = APIRouter()
 
@@ -77,6 +78,8 @@ async def create_new_item(
         tags=item_create.tags,
         image=item_create.image
     )
+    if item.image is None:
+        item.image = await generate_image(image.title, 1, "256x256")
     send_event('item_created', {'item': item_create.title})
     return ItemInResponse(item=ItemForResponse.from_orm(item))
 
