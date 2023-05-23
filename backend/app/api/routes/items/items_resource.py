@@ -69,6 +69,8 @@ async def create_new_item(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=strings.ITEM_ALREADY_EXISTS,
         )
+    if not item_create.image:
+        item_create.image = generate_image(item_create.title, 1, "256x256")
     item = await items_repo.create_item(
         slug=slug,
         title=item_create.title,
@@ -78,8 +80,6 @@ async def create_new_item(
         tags=item_create.tags,
         image=item_create.image
     )
-    if item.image is None:
-        item.image = await generate_image(image.title, 1, "256x256")
     send_event('item_created', {'item': item_create.title})
     return ItemInResponse(item=ItemForResponse.from_orm(item))
 
